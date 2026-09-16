@@ -43,6 +43,5 @@ public class DatabaseHelper
 
     public SqliteConnection GetConnection()
     {
-        return new SqliteConnection(connectionString);
     }
 }
