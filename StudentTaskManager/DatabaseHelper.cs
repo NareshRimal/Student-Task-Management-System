@@ -1,47 +1,39 @@
-﻿using System;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 
-public class DatabaseHelper
+namespace StudentTaskManager
 {
-    private string connectionString = "Data Source=tasks.db";
-
-    public DatabaseHelper()
+    public class DatabaseHelper
     {
-        InitializeDatabase();
-    }
+        private string connectionString = "Data Source=studenttasks.db";
 
-    private void InitializeDatabase()
-    {
-        try
+        public SqliteConnection GetConnection()
         {
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            return new SqliteConnection(connectionString);
+        }
+
+        public void CreateDatabase()
+        {
+            using (var connection = GetConnection())
             {
                 connection.Open();
 
-                string createTableQuery = @"
-                    CREATE TABLE IF NOT EXISTS Tasks (
+                var command = connection.CreateCommand();
+
+                command.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Tasks
+                    (
                         TaskId INTEGER PRIMARY KEY AUTOINCREMENT,
                         TaskName TEXT NOT NULL,
-                        Unit TEXT,
+                        Unit TEXT NOT NULL,
                         Description TEXT,
-                        DueDate TEXT,
-                        Priority TEXT,
-                        Status TEXT
-                    );";
+                        DueDate TEXT NOT NULL,
+                        Priority TEXT NOT NULL,
+                        Status TEXT NOT NULL
+                    )";
 
-                using (SqliteCommand command = new SqliteCommand(createTableQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+                command.ExecuteNonQuery();
             }
         }
-        catch (Exception ex)
-        {
-            throw new Exception("Failed to initialize database: " + ex.Message);
-        }
-    }
-
-    public SqliteConnection GetConnection()
-    {
     }
 }
+ 

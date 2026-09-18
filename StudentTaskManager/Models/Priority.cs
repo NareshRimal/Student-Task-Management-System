@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace StudentTaskManager.Models
 {
-    internal class Priority
+    public enum Priority
     {
+        Low,
+        Medium,
+        High
     }
 }
