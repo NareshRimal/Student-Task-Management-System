@@ -4,15 +4,38 @@ namespace StudentTaskManager.Models
 {
     public class TaskItem
     {
+        private string taskName;
+        private DateTime dueDate;
+
         public int TaskId { get; set; }
 
-        public string TaskName { get; set; }
+        // ENCAPSULATION: validation happens inside the setter
+        public string TaskName
+        {
+            get { return taskName; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Task name cannot be empty.");
+                taskName = value;
+            }
+        }
 
         public string Unit { get; set; }
 
         public string Description { get; set; }
 
-        public DateTime DueDate { get; set; }
+        // ENCAPSULATION: validation happens inside the setter
+        public DateTime DueDate
+        {
+            get { return dueDate; }
+            set
+            {
+                if (value < DateTime.Now.Date)
+                    throw new ArgumentException("Due date cannot be in the past.");
+                dueDate = value;
+            }
+        }
 
         public Priority Priority { get; set; }
 
