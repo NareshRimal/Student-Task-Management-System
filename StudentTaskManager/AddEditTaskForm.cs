@@ -18,15 +18,11 @@ namespace StudentTaskManager
 
         private void BtnSave_Click(object? sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtTaskName.Text))
-            {
-                MessageBox.Show("Task name is required.");
-                return;
-            }
-
+            // Unit is required (the task name is checked inside TaskItem)
             if (string.IsNullOrWhiteSpace(txtUnit.Text))
             {
-                MessageBox.Show("Unit is required.");
+                MessageBox.Show("Unit is required.", "Invalid Input",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -46,9 +42,17 @@ namespace StudentTaskManager
                 TaskSaved = true;
                 this.Close();
             }
+            catch (ArgumentException ex)
+            {
+                // Bad input: empty name or past date
+                MessageBox.Show(ex.Message, "Invalid Input",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving task: " + ex.Message);
+                // Anything else, such as a database problem
+                MessageBox.Show("Error saving task: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -59,7 +63,6 @@ namespace StudentTaskManager
 
         private void txtTaskName_TextChanged(object sender, EventArgs e)
         {
-
         }
     }
 } 

@@ -11,50 +11,38 @@ namespace StudentTaskManager
 
         public void AddTask(TaskItem task)
         {
+            // Rule for NEW tasks only: due date cannot be in the past.
+            // This is outside the try so the form can show a warning.
+            if (task.DueDate.Date < DateTime.Today)
+                throw new ArgumentException("Due date cannot be in the past.");
+
             try
             {
-                var connection = dbHelper.GetConnection();
-                connection.Open();
+                using (var connection = dbHelper.GetConnection())
+                {
+                    connection.Open();
 
-                var command = connection.CreateCommand();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText =
+                            "INSERT INTO Tasks " +
+                            "(TaskName, Unit, Description, DueDate, Priority, Status) " +
+                            "VALUES (@name, @unit, @desc, @due, @priority, @status)";
 
-                command.CommandText =
-                    "INSERT INTO Tasks " +
-                    "(TaskName, Unit, Description, DueDate, Priority, Status) " +
-                    "VALUES (@name, @unit, @desc, @due, @priority, @status)";
+                        command.Parameters.AddWithValue("@name", task.TaskName);
+                        command.Parameters.AddWithValue("@unit", task.Unit);
+                        command.Parameters.AddWithValue("@desc", task.Description);
+                        command.Parameters.AddWithValue("@due", task.DueDate.ToString("yyyy-MM-dd"));
+                        command.Parameters.AddWithValue("@priority", task.Priority.ToString());
+                        command.Parameters.AddWithValue("@status", task.Status.ToString());
 
-                command.Parameters.AddWithValue(
-                    "@name",
-                    task.TaskName);
-
-                command.Parameters.AddWithValue(
-                    "@unit",
-                    task.Unit);
-
-                command.Parameters.AddWithValue(
-                    "@desc",
-                    task.Description);
-
-                command.Parameters.AddWithValue(
-                    "@due",
-                    task.DueDate.ToString("yyyy-MM-dd"));
-
-                command.Parameters.AddWithValue(
-                    "@priority",
-                    task.Priority.ToString());
-
-                command.Parameters.AddWithValue(
-                    "@status",
-                    task.Status.ToString());
-
-                command.ExecuteNonQuery();
-
-                connection.Close();
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "Failed to add task: " + ex.Message);
+                throw new Exception("Failed to add task: " + ex.Message, ex);
             }
         }
 
@@ -64,44 +52,39 @@ namespace StudentTaskManager
 
             try
             {
-                var connection = dbHelper.GetConnection();
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = "SELECT * FROM Tasks";
-
-                var reader = command.ExecuteReader();
-
-                while (reader.Read())
+                using (var connection = dbHelper.GetConnection())
                 {
-                    TaskItem task = new TaskItem(
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        reader.GetString(3),
-                        DateTime.Parse(reader.GetString(4)),
-                        (Priority)Enum.Parse(
-                            typeof(Priority),
-                            reader.GetString(5))
-                    );
+                    connection.Open();
 
-                    task.TaskId = reader.GetInt32(0);
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT * FROM Tasks";
 
-                    task.Status =
-                        (StudentTaskManager.Models.TaskStatus)
-                        Enum.Parse(
-                            typeof(StudentTaskManager.Models.TaskStatus),
-                            reader.GetString(6));
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                TaskItem task = new TaskItem(
+                                    reader.GetString(1),
+                                    reader.GetString(2),
+                                    reader.GetString(3),
+                                    DateTime.Parse(reader.GetString(4)),
+                                    Enum.Parse<Priority>(reader.GetString(5))
+                                );
 
-                    tasks.Add(task);
+                                task.TaskId = reader.GetInt32(0);
+                                task.Status = Enum.Parse<StudentTaskManager.Models.TaskStatus>(
+                                    reader.GetString(6));
+
+                                tasks.Add(task);
+                            }
+                        }
+                    }
                 }
-
-                connection.Close();
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "Failed to load tasks: " + ex.Message);
+                throw new Exception("Failed to load tasks: " + ex.Message, ex);
             }
 
             return tasks;
@@ -111,53 +94,33 @@ namespace StudentTaskManager
         {
             try
             {
-                var connection = dbHelper.GetConnection();
-                connection.Open();
+                using (var connection = dbHelper.GetConnection())
+                {
+                    connection.Open();
 
-                var command = connection.CreateCommand();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText =
+                            "UPDATE Tasks SET " +
+                            "TaskName = @name, Unit = @unit, Description = @desc, " +
+                            "DueDate = @due, Priority = @priority, Status = @status " +
+                            "WHERE TaskId = @id";
 
-                command.CommandText =
-                    "UPDATE Tasks SET " +
-                    "TaskName = @name, Unit = @unit, Description = @desc, " +
-                    "DueDate = @due, Priority = @priority, Status = @status " +
-                    "WHERE TaskId = @id";
+                        command.Parameters.AddWithValue("@name", task.TaskName);
+                        command.Parameters.AddWithValue("@unit", task.Unit);
+                        command.Parameters.AddWithValue("@desc", task.Description);
+                        command.Parameters.AddWithValue("@due", task.DueDate.ToString("yyyy-MM-dd"));
+                        command.Parameters.AddWithValue("@priority", task.Priority.ToString());
+                        command.Parameters.AddWithValue("@status", task.Status.ToString());
+                        command.Parameters.AddWithValue("@id", task.TaskId);
 
-                command.Parameters.AddWithValue(
-                    "@name",
-                    task.TaskName);
-
-                command.Parameters.AddWithValue(
-                    "@unit",
-                    task.Unit);
-
-                command.Parameters.AddWithValue(
-                    "@desc",
-                    task.Description);
-
-                command.Parameters.AddWithValue(
-                    "@due",
-                    task.DueDate.ToString("yyyy-MM-dd"));
-
-                command.Parameters.AddWithValue(
-                    "@priority",
-                    task.Priority.ToString());
-
-                command.Parameters.AddWithValue(
-                    "@status",
-                    task.Status.ToString());
-
-                command.Parameters.AddWithValue(
-                    "@id",
-                    task.TaskId);
-
-                command.ExecuteNonQuery();
-
-                connection.Close();
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "Failed to update task: " + ex.Message);
+                throw new Exception("Failed to update task: " + ex.Message, ex);
             }
         }
 
@@ -165,27 +128,22 @@ namespace StudentTaskManager
         {
             try
             {
-                var connection = dbHelper.GetConnection();
-                connection.Open();
+                using (var connection = dbHelper.GetConnection())
+                {
+                    connection.Open();
 
-                var command = connection.CreateCommand();
-
-                command.CommandText =
-                    "DELETE FROM Tasks WHERE TaskId = @id";
-
-                command.Parameters.AddWithValue(
-                    "@id",
-                    taskId);
-
-                command.ExecuteNonQuery();
-
-                connection.Close();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "DELETE FROM Tasks WHERE TaskId = @id";
+                        command.Parameters.AddWithValue("@id", taskId);
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    "Failed to delete task: " + ex.Message);
+                throw new Exception("Failed to delete task: " + ex.Message, ex);
             }
         }
     }
-}
+} 

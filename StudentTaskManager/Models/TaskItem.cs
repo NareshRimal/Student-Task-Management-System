@@ -4,12 +4,11 @@ namespace StudentTaskManager.Models
 {
     public class TaskItem
     {
-        private string taskName;
-        private DateTime dueDate;
+        private string taskName = string.Empty;
 
         public int TaskId { get; set; }
 
-        // ENCAPSULATION: validation happens inside the setter
+        // ENCAPSULATION: the name is checked inside the setter
         public string TaskName
         {
             get { return taskName; }
@@ -17,6 +16,7 @@ namespace StudentTaskManager.Models
             {
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ArgumentException("Task name cannot be empty.");
+
                 taskName = value;
             }
         }
@@ -25,17 +25,8 @@ namespace StudentTaskManager.Models
 
         public string Description { get; set; }
 
-        // ENCAPSULATION: validation happens inside the setter
-        public DateTime DueDate
-        {
-            get { return dueDate; }
-            set
-            {
-                if (value < DateTime.Now.Date)
-                    throw new ArgumentException("Due date cannot be in the past.");
-                dueDate = value;
-            }
-        }
+        // No past-date check here, so old saved tasks can still load
+        public DateTime DueDate { get; set; }
 
         public Priority Priority { get; set; }
 
