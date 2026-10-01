@@ -44,7 +44,13 @@ namespace StudentTaskManager
 
         private void BtnAdd_Click(object? sender, EventArgs e)
         {
-            MessageBox.Show("Add Task form coming tomorrow!");
+            AddEditTaskForm addForm = new AddEditTaskForm();
+            addForm.ShowDialog();
+
+            if (addForm.TaskSaved)
+            {
+                LoadTasks();
+            }
         }
 
         private void BtnDelete_Click(object? sender, EventArgs e)
@@ -73,5 +79,10 @@ namespace StudentTaskManager
         {
             LoadTasks();
         }
+
+        private void dataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
-}
+} 

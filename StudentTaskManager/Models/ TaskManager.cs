@@ -107,6 +107,60 @@ namespace StudentTaskManager
             return tasks;
         }
 
+        public void UpdateTask(TaskItem task)
+        {
+            try
+            {
+                var connection = dbHelper.GetConnection();
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                    "UPDATE Tasks SET " +
+                    "TaskName = @name, Unit = @unit, Description = @desc, " +
+                    "DueDate = @due, Priority = @priority, Status = @status " +
+                    "WHERE TaskId = @id";
+
+                command.Parameters.AddWithValue(
+                    "@name",
+                    task.TaskName);
+
+                command.Parameters.AddWithValue(
+                    "@unit",
+                    task.Unit);
+
+                command.Parameters.AddWithValue(
+                    "@desc",
+                    task.Description);
+
+                command.Parameters.AddWithValue(
+                    "@due",
+                    task.DueDate.ToString("yyyy-MM-dd"));
+
+                command.Parameters.AddWithValue(
+                    "@priority",
+                    task.Priority.ToString());
+
+                command.Parameters.AddWithValue(
+                    "@status",
+                    task.Status.ToString());
+
+                command.Parameters.AddWithValue(
+                    "@id",
+                    task.TaskId);
+
+                command.ExecuteNonQuery();
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(
+                    "Failed to update task: " + ex.Message);
+            }
+        }
+
         public void DeleteTask(int taskId)
         {
             try
